@@ -1,6 +1,7 @@
 import { Router, request } from 'express';
 import packageJson from '../package.json';
 import { HabitsController } from './controllers/habits.controller';
+import { FocusTimeController } from './controllers/focus-time.controller';
 
 export const routes = Router();
 
@@ -10,11 +11,18 @@ routes.get('/', (request, response) => {
 });
 
 const habitsController = new HabitsController();
+const focusTimeController = new FocusTimeController();
 
 routes.get('/habits', habitsController.index);
+
+routes.get('/habits/:id/metrics', habitsController.metrics);
 
 routes.post('/habits', habitsController.store);
 
 routes.delete('/habits/:id', habitsController.remove);
 
 routes.patch('/habits/:id/toggle', habitsController.toggle);
+
+routes.post('/focus-time', focusTimeController.store);
+
+routes.get('/focus-time/metrics/month', focusTimeController.metricsByMonth);

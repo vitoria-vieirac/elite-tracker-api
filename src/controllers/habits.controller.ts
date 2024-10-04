@@ -3,6 +3,7 @@ import { habitModel } from '../models/habit.model';
 import { z } from 'zod';
 import { buildValidationErrorMessage } from '../utils/build-validation-error-message.util';
 import dayjs from 'dayjs';
+import mongoose from 'mongoose';
 
 export class HabitsController {
   store = async (request: Request, response: Response): Promise<Response> => {
@@ -132,5 +133,55 @@ export class HabitsController {
     );
 
     return response.json(habitUpdate);
+  };
+
+  metrics = async (request: Request, response: Response) => {
+    const schema = z.object({
+      id: z.string(),
+      date: z.coerce.date(),
+    });
+
+    const validated = schema.safeParse({ ...request.params, ...request.body });
+
+    if (!validated.success) {
+      const errors = buildValidationErrorMessage(validated.error.issues);
+
+      return response.status(422).json({ message: errors });
+    }
+
+    const dateFrom = dayjs(validated.data.date).startOf('month');
+    const dateTo = dayjs(validated.data.date).endOf('month');
+
+    const [habitMetrics] = await habitModel
+      .aggregate()
+      .match({
+        _id: new mongoose.Types.ObjectId(validated.data.id),
+      })
+      .project({
+        _id: 1,
+        name: 1,
+        completedDates: {
+          $filter: {
+            input: '$completedDates',
+            as: 'completedDate',
+            cond: {
+              $and: [
+                {
+                  $gte: ['$$completedDate', dateFrom.toDate()],
+                },
+                {
+                  $lte: ['$$completedDate', dateTo.toDate()],
+                },
+              ],
+            },
+          },
+        },
+      });
+
+    if (!habitMetrics) {
+      return response.status(404).json({ message: 'Habit not found.' });
+    }
+
+    return response.status(200).json(habitMetrics);
   };
 }
