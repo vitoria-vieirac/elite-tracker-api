@@ -13,6 +13,8 @@ routes.get('/', (request, response) => {
 const habitsController = new HabitsController();
 const focusTimeController = new FocusTimeController();
 
+routes.get('/auth');
+
 routes.get('/habits', habitsController.index);
 
 routes.get('/habits/:id/metrics', habitsController.metrics);
@@ -25,4 +27,6 @@ routes.patch('/habits/:id/toggle', habitsController.toggle);
 
 routes.post('/focus-time', focusTimeController.store);
 
-routes.get('/focus-time/metrics/month', focusTimeController.metricsByMonth);
+routes.get('/focus-time', focusTimeController.index);
+
+routes.get('/focus-time/metrics', focusTimeController.metricsByMonth);
