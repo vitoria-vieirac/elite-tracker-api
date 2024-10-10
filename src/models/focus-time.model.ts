@@ -1,15 +1,11 @@
 import { Schema, model } from 'mongoose';
+import { string } from 'zod';
 
 const focusTimeSchema = new Schema(
   {
-    timeFrom: {
-      type: Date,
-      required: true,
-    },
-    timeTo: {
-      type: Date,
-      required: true,
-    },
+    timeFrom: Date,
+    timeTo: Date,
+    userId: { type: String },
   },
   {
     versionKey: false,

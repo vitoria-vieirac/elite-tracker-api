@@ -1,7 +1,9 @@
-import { Router, request } from 'express';
+import { Router } from 'express';
 import packageJson from '../package.json';
 import { HabitsController } from './controllers/habits.controller';
 import { FocusTimeController } from './controllers/focus-time.controller';
+import { AuthController } from './controllers/auth.controller';
+import { authMiddleware } from './middlewares/auth.middleware';
 
 export const routes = Router();
 
@@ -12,8 +14,13 @@ routes.get('/', (request, response) => {
 
 const habitsController = new HabitsController();
 const focusTimeController = new FocusTimeController();
+const authController = new AuthController();
 
-routes.get('/auth');
+routes.get('/auth', authController.auth);
+
+routes.get('/auth/callback', authController.authCallback);
+
+routes.use(authMiddleware);
 
 routes.get('/habits', habitsController.index);
 
